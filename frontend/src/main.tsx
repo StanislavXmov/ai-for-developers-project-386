@@ -6,12 +6,15 @@ import { MantineProvider } from '@mantine/core'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter, createRootRoute, createRoute, Outlet } from '@tanstack/react-router'
 import { Header } from './components/Header'
+import { IndexPage } from './pages/IndexPage'
+import { CreatePage } from './pages/CreatePage'
+import { AdminPage } from './pages/AdminPage'
 
 const queryClient = new QueryClient()
 
 const rootRoute = createRootRoute({
   component: () => (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50">
       <Header />
       <main>
         <Outlet />
@@ -23,31 +26,19 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: () => (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-4">Welcome to Calendar</h1>
-    </div>
-  ),
+  component: IndexPage,
 })
 
 const createMeetingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/create',
-  component: () => (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Create Meeting</h1>
-    </div>
-  ),
+  component: CreatePage,
 })
 
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
-  component: () => (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Admin</h1>
-    </div>
-  ),
+  component: AdminPage,
 })
 
 const routeTree = rootRoute.addChildren([indexRoute, createMeetingRoute, adminRoute])
