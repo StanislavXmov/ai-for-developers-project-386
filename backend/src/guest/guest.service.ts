@@ -1,29 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { EventType, Slot, SlotStatus, Booking } from '../entities';
-import { CreateBookingDto } from '../dtos';
+import { Injectable } from "@nestjs/common";
+import { EventType, Slot, SlotStatus, Booking } from "../entities";
+import { CreateBookingDto } from "../dtos";
 
 @Injectable()
 export class GuestService {
+  private readonly workdayStartHour = 9;
+  private readonly workdayEndHour = 17;
+
   private eventTypes: EventType[] = [
     {
-      id: '1',
-      name: 'Consultation',
-      description: '30-minute consultation call',
+      id: "1",
+      name: "Consultation",
+      description: "30-minute consultation call",
       durationMinutes: 30,
     },
     {
-      id: '2',
-      name: 'Demo',
-      description: 'Product demo session',
+      id: "2",
+      name: "Demo",
+      description: "Product demo session",
       durationMinutes: 60,
     },
-  ];
-
-  private slots: Slot[] = [
-    { startTime: '2026-05-25T10:00:00Z', eventTypeId: '1', status: SlotStatus.Available },
-    { startTime: '2026-05-25T11:00:00Z', eventTypeId: '1', status: SlotStatus.Available },
-    { startTime: '2026-05-26T10:00:00Z', eventTypeId: '1', status: SlotStatus.Booked },
-    { startTime: '2026-05-25T14:00:00Z', eventTypeId: '2', status: SlotStatus.Available },
   ];
 
   private bookings: Booking[] = [];
@@ -33,17 +29,65 @@ export class GuestService {
   }
 
   getSlots(eventTypeId: string, from: string, to: string): Slot[] {
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
+    console.log({ eventTypeId, from, to });
 
-    return this.slots.filter(slot => {
-      const slotDate = new Date(slot.startTime);
-      return (
-        slot.eventTypeId === eventTypeId &&
-        slotDate >= fromDate &&
-        slotDate <= toDate
-      );
-    });
+    const eventType = this.eventTypes.find((type) => type.id === eventTypeId);
+    if (!eventType) {
+      return [];
+    }
+
+    const fromDate = from ? new Date(from) : new Date();
+    const now = new Date();
+    const endOfCurrentMonth = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999),
+    );
+    const toDate = to ? new Date(to) : endOfCurrentMonth;
+    console.log({ fromDate, toDate });
+
+    const slots: Slot[] = [];
+    const currentDay = new Date(fromDate);
+    currentDay.setUTCHours(0, 0, 0, 0);
+
+    while (currentDay <= toDate) {
+      const slotTime = new Date(currentDay);
+      slotTime.setUTCHours(this.workdayStartHour, 0, 0, 0);
+
+      const workdayEnd = new Date(currentDay);
+      workdayEnd.setUTCHours(this.workdayEndHour, 0, 0, 0);
+
+      while (slotTime < workdayEnd) {
+        const slotEnd = new Date(
+          slotTime.getTime() + eventType.durationMinutes * 60 * 1000,
+        );
+
+        if (slotEnd > workdayEnd) {
+          break;
+        }
+
+        if (slotTime >= fromDate && slotTime <= toDate) {
+          const startTime = slotTime.toISOString();
+          const isBooked = this.bookings.some(
+            (booking) =>
+              booking.eventTypeId === eventTypeId &&
+              booking.slotTime === startTime,
+          );
+
+          slots.push({
+            startTime,
+            eventTypeId,
+            status: isBooked ? SlotStatus.Booked : SlotStatus.Available,
+          });
+        }
+
+        slotTime.setUTCMinutes(
+          slotTime.getUTCMinutes() + eventType.durationMinutes,
+        );
+      }
+
+      currentDay.setUTCDate(currentDay.getUTCDate() + 1);
+    }
+
+    return slots;
   }
 
   createBooking(dto: CreateBookingDto): Booking {
@@ -53,13 +97,6 @@ export class GuestService {
       createdAt: new Date().toISOString(),
     };
     this.bookings.push(booking);
-
-    const slotIndex = this.slots.findIndex(
-      s => s.eventTypeId === dto.eventTypeId && s.startTime === dto.slotTime,
-    );
-    if (slotIndex !== -1) {
-      this.slots[slotIndex].status = SlotStatus.Booked;
-    }
 
     return booking;
   }
