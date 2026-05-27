@@ -23,6 +23,12 @@ model Slot {
   status: SlotStatus;
 }
 
+model AdminSlot {
+  dayOfWeek: int32;
+  startTime: string;
+  endTime: string;
+}
+
 enum SlotStatus {
   available,
   booked,
@@ -81,4 +87,12 @@ interface AdminApi {
   @route("/api/admin/bookings")
   @get
   getUpcomingBookings(): Booking[];
+
+  @route("/api/admin/slots")
+  @get
+  getSlots(): AdminSlot[];
+
+  @route("/api/admin/slots")
+  @post
+  createSlots(@body slots: AdminSlot[]): AdminSlot[];
 }

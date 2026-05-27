@@ -1,11 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { EventType, Slot, SlotStatus, Booking } from "../entities";
 import { CreateBookingDto } from "../dtos";
+import { AdminService } from "../admin/admin.service";
 
 @Injectable()
 export class GuestService {
-  private readonly workdayStartHour = 9;
-  private readonly workdayEndHour = 17;
+  private readonly defaultStartHour = 9;
+  private readonly defaultEndHour = 17;
 
   private eventTypes: EventType[] = [
     {
@@ -23,6 +24,8 @@ export class GuestService {
   ];
 
   private bookings: Booking[] = [];
+
+  constructor(private readonly adminService: AdminService) {}
 
   getEventTypes(): EventType[] {
     return this.eventTypes;
@@ -49,11 +52,21 @@ export class GuestService {
     currentDay.setUTCHours(0, 0, 0, 0);
 
     while (currentDay <= toDate) {
+      const dayOfWeek = currentDay.getUTCDay();
+      const adminSlot = this.adminService.getAdminSlotForDay(dayOfWeek);
+
+      const startHour = adminSlot
+        ? parseInt(adminSlot.startTime.split(":")[0], 10)
+        : this.defaultStartHour;
+      const endHour = adminSlot
+        ? parseInt(adminSlot.endTime.split(":")[0], 10)
+        : this.defaultEndHour;
+
       const slotTime = new Date(currentDay);
-      slotTime.setUTCHours(this.workdayStartHour, 0, 0, 0);
+      slotTime.setUTCHours(startHour, 0, 0, 0);
 
       const workdayEnd = new Date(currentDay);
-      workdayEnd.setUTCHours(this.workdayEndHour, 0, 0, 0);
+      workdayEnd.setUTCHours(endHour, 0, 0, 0);
 
       while (slotTime < workdayEnd) {
         const slotEnd = new Date(

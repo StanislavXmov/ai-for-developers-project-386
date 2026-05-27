@@ -35,3 +35,9 @@ export interface Slot {
   eventTypeId: string;
   status: SlotStatus;
 }
+
+export interface AdminSlot {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}

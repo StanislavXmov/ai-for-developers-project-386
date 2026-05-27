@@ -24,6 +24,12 @@ export interface EventType {
   durationMinutes: number;
 }
 
+export interface AdminSlot {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}
+
 export interface Booking {
   id: string;
   eventTypeId: string;
@@ -56,6 +62,8 @@ export interface GetSlotsParams {
 export type AdminApi = {
   getUpcomingBookings: () => Promise<Booking[]>;
   createEventType: (request: CreateEventTypeRequest) => Promise<EventType>;
+  getSlots: () => Promise<AdminSlot[]>;
+  createSlots: (slots: AdminSlot[]) => Promise<AdminSlot[]>;
 };
 
 export type GuestApi = {

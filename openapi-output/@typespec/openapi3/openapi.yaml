@@ -55,6 +55,43 @@ paths:
                 - name
                 - description
                 - durationMinutes
+  /api/admin/slots:
+    get:
+      operationId: AdminApi_getSlots
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminSlot'
+      tags:
+        - Admin
+    post:
+      operationId: AdminApi_createSlots
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminSlot'
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AdminSlot'
   /api/bookings:
     post:
       operationId: GuestApi_createBooking
@@ -143,6 +180,20 @@ paths:
         - Guest
 components:
   schemas:
+    AdminSlot:
+      type: object
+      required:
+        - dayOfWeek
+        - startTime
+        - endTime
+      properties:
+        dayOfWeek:
+          type: integer
+          format: int32
+        startTime:
+          type: string
+        endTime:
+          type: string
     Booking:
       type: object
       required:
