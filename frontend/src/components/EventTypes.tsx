@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { adminApi } from "../api/adminApi";
 import type { EventType } from "../types/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface EventTypesProps {
   onCreated?: (eventType: EventType) => void;
@@ -28,7 +33,7 @@ export function EventTypes({ onCreated }: EventTypesProps) {
       setDescription("");
       setDurationMinutes(30);
       onCreated?.(newEventType);
-    } catch (err) {
+    } catch {
       setError("Failed to create event type");
     } finally {
       setSaving(false);
@@ -36,58 +41,63 @@ export function EventTypes({ onCreated }: EventTypesProps) {
   }
 
   return (
-    <div>
-      <h2 className="text-xl font-medium text-black mb-4">Create Event Type</h2>
+    <Card>
+      <CardHeader>
+        <CardTitle>Create Event Type</CardTitle>
+        <CardDescription>
+          Add a new type of meeting you offer.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+              {error}
+            </div>
+          )}
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>
-      )}
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="Consultation"
+            />
+          </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-        <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className="w-full px-3 py-2 border rounded"
-            placeholder="Consultation"
-          />
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+              placeholder="30-minute consultation call"
+              rows={3}
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-            className="w-full px-3 py-2 border rounded"
-            placeholder="30-minute consultation call"
-            rows={3}
-          />
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="duration">Duration (minutes)</Label>
+            <Input
+              id="duration"
+              type="number"
+              value={durationMinutes}
+              onChange={(e) => setDurationMinutes(parseInt(e.target.value, 10))}
+              required
+              min={1}
+              className="w-32"
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Duration (minutes)</label>
-          <input
-            type="number"
-            value={durationMinutes}
-            onChange={(e) => setDurationMinutes(parseInt(e.target.value, 10))}
-            required
-            min={1}
-            className="w-full px-3 py-2 border rounded"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {saving ? "Creating..." : "Create"}
-        </button>
-      </form>
-    </div>
+          <Button type="submit" disabled={saving}>
+            {saving ? "Creating..." : "Create Event Type"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

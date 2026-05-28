@@ -1,5 +1,16 @@
 import { useState, useEffect } from "react";
 import { adminApi } from "../api/adminApi";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 const DAYS = [
   { dayOfWeek: 0, name: "Sunday" },
@@ -62,7 +73,7 @@ export function AdminSlots({ onSaved }: AdminSlotsProps) {
           };
         }),
       );
-    } catch (err) {
+    } catch {
       setError("Failed to load slots");
     } finally {
       setLoading(false);
@@ -82,7 +93,7 @@ export function AdminSlots({ onSaved }: AdminSlotsProps) {
         }));
       await adminApi.createSlots(enabledSlots);
       onSaved?.();
-    } catch (err) {
+    } catch {
       setError("Failed to save slots");
     } finally {
       setSaving(false);
@@ -102,71 +113,81 @@ export function AdminSlots({ onSaved }: AdminSlotsProps) {
   }
 
   if (loading) {
-    return <p className="text-black/50">Loading...</p>;
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-muted-foreground">Loading...</p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div>
-      <h2 className="text-xl font-medium text-black mb-4">
-        Weekly Availability
-      </h2>
+    <Card>
+      <CardHeader>
+        <CardTitle>Weekly Availability</CardTitle>
+        <CardDescription>
+          Set your available hours for each day of the week.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {error && (
+          <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+            {error}
+          </div>
+        )}
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>
-      )}
-
-      <div className="space-y-3 mb-6">
-        {slots.map((slot) => {
-          const dayName =
-            DAYS.find((d) => d.dayOfWeek === slot.dayOfWeek)?.name ?? "";
-          return (
-            <div key={slot.dayOfWeek} className="flex items-center gap-4">
-              <div className="w-28">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
+        <div className="space-y-4">
+          {slots.map((slot) => {
+            const dayName =
+              DAYS.find((d) => d.dayOfWeek === slot.dayOfWeek)?.name ?? "";
+            return (
+              <div key={slot.dayOfWeek} className="flex items-center gap-4">
+                <div className="w-32 flex items-center gap-2">
+                  <Switch
+                    id={`day-${slot.dayOfWeek}`}
                     checked={slot.enabled}
-                    onChange={(e) =>
-                      updateSlot(slot.dayOfWeek, "enabled", e.target.checked)
+                    onCheckedChange={(checked) =>
+                      updateSlot(slot.dayOfWeek, "enabled", checked)
                     }
-                    className="w-4 h-4"
                   />
-                  <span className="font-medium">{dayName}</span>
-                </label>
+                  <Label
+                    htmlFor={`day-${slot.dayOfWeek}`}
+                    className="font-medium"
+                  >
+                    {dayName}
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="time"
+                    value={slot.startTime}
+                    onChange={(e) =>
+                      updateSlot(slot.dayOfWeek, "startTime", e.target.value)
+                    }
+                    disabled={!slot.enabled}
+                    className="w-32"
+                  />
+                  <span className="text-muted-foreground">to</span>
+                  <Input
+                    type="time"
+                    value={slot.endTime}
+                    onChange={(e) =>
+                      updateSlot(slot.dayOfWeek, "endTime", e.target.value)
+                    }
+                    disabled={!slot.enabled}
+                    className="w-32"
+                  />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="time"
-                  value={slot.startTime}
-                  onChange={(e) =>
-                    updateSlot(slot.dayOfWeek, "startTime", e.target.value)
-                  }
-                  disabled={!slot.enabled}
-                  className="px-3 py-2 border rounded disabled:opacity-50"
-                />
-                <span className="text-black/50">to</span>
-                <input
-                  type="time"
-                  value={slot.endTime}
-                  onChange={(e) =>
-                    updateSlot(slot.dayOfWeek, "endTime", e.target.value)
-                  }
-                  disabled={!slot.enabled}
-                  className="px-3 py-2 border rounded disabled:opacity-50"
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
 
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-      >
-        {saving ? "Saving..." : "Save"}
-      </button>
-    </div>
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? "Saving..." : "Save Changes"}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

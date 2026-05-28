@@ -1,46 +1,28 @@
-import { Link } from '@tanstack/react-router'
-import { Group, Text } from '@mantine/core'
+import { Link } from "@tanstack/react-router";
+import { Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function Header() {
   return (
-    <header className="bg-white border-b border-black/10 px-6 py-4">
-      <Group justify="space-between" align="center">
-        <Group gap="sm">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-black"
-          >
-            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-            <line x1="16" x2="16" y1="2" y2="6" />
-            <line x1="8" x2="8" y1="2" y2="6" />
-            <line x1="3" x2="21" y1="10" y2="10" />
-          </svg>
-          <Text fw={500} size="lg" c="dark">Calendar</Text>
-        </Group>
-        <Group gap="8">
-          <Link
-            to="/create"
-            className="text-sm text-black/60 hover:text-black transition-colors duration-150"
-          >
-            Create meeting
-          </Link>
-          <span className="text-black/20">|</span>
-          <Link
-            to="/admin"
-            className="text-sm text-black/60 hover:text-black transition-colors duration-150"
-          >
-            Admin
-          </Link>
-        </Group>
-      </Group>
+    <header className="border-b bg-white px-6 py-4">
+      <div className="flex items-center justify-between">
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-foreground hover:text-foreground/80 transition-colors"
+        >
+          <Calendar className="h-5 w-5" />
+          <span className="font-medium text-lg">Calendar</span>
+        </Link>
+        <nav className="flex items-center gap-6">
+          <Button variant="ghost" asChild>
+            <Link to="/create">Create meeting</Link>
+          </Button>
+          <span className="text-border">|</span>
+          <Button variant="ghost" asChild>
+            <Link to="/admin">Admin</Link>
+          </Button>
+        </nav>
+      </div>
     </header>
-  )
+  );
 }
