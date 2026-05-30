@@ -45,7 +45,10 @@ export function SlotPicker({
   onBack,
 }: SlotPickerProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [focusDate, setFocusDate] = useState(new Date());
+  const [focusDate, setFocusDate] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
 
   const { data: slots, isLoading } = useSlots(eventType.id, focusDate);
 
@@ -62,6 +65,10 @@ export function SlotPicker({
   );
 
   const availableDates = Object.keys(availableSlotsByDate);
+  const availableDatesInMonth = availableDates.filter(dateKey => {
+    const date = dateFromKey(dateKey);
+    return date.getMonth() === focusDate.getMonth() && date.getFullYear() === focusDate.getFullYear();
+  });
 
   function handleSelect(date: Date | undefined) {
     if (!date) return;
@@ -85,8 +92,16 @@ export function SlotPicker({
       : `${selectedDaySlots.length} slots available`;
 
   function handleMonthChange(date: Date) {
-    setFocusDate(date);
-    setSelectedDate(null);
+    const newFocusDate = new Date(date.getFullYear(), date.getMonth(), 1);
+    if (focusDate.getFullYear() !== newFocusDate.getFullYear() ||
+        focusDate.getMonth() !== newFocusDate.getMonth()) {
+      setFocusDate(newFocusDate);
+      if (!selectedDate || 
+          date.getMonth() !== selectedDate.getMonth() ||
+          date.getFullYear() !== selectedDate.getFullYear()) {
+        setSelectedDate(null);
+      }
+    }
   }
 
   return (
@@ -112,7 +127,7 @@ export function SlotPicker({
               onSelect={handleSelect}
               onMonthChange={handleMonthChange}
               modifiers={{
-                available: availableDates.map(dateFromKey),
+                available: availableDatesInMonth.map(dateFromKey),
               }}
               modifiersClassNames={{
                 available: "font-medium underline underline-offset-4",
