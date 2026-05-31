@@ -2,39 +2,28 @@ import { Injectable } from "@nestjs/common";
 import { EventType, Slot, SlotStatus, Booking } from "../entities";
 import { CreateBookingDto } from "../dtos";
 import { AdminService } from "../admin/admin.service";
+import { JsonStorageService } from "../storage/json-storage.service";
 
 @Injectable()
 export class GuestService {
   private readonly defaultStartHour = 9;
   private readonly defaultEndHour = 17;
 
-  private eventTypes: EventType[] = [
-    {
-      id: "1",
-      name: "Consultation",
-      description: "30-minute consultation call",
-      durationMinutes: 30,
-    },
-    {
-      id: "2",
-      name: "Demo",
-      description: "Product demo session",
-      durationMinutes: 60,
-    },
-  ];
-
-  private bookings: Booking[] = [];
-
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly storage: JsonStorageService,
+  ) {}
 
   getEventTypes(): EventType[] {
-    return this.eventTypes;
+    return this.storage.getEventTypes();
   }
 
   getSlots(eventTypeId: string, from: string, to: string): Slot[] {
     console.log({ eventTypeId, from, to });
 
-    const eventType = this.eventTypes.find((type) => type.id === eventTypeId);
+    const eventType = this.storage
+      .getEventTypes()
+      .find((type) => type.id === eventTypeId);
     if (!eventType) {
       return [];
     }
@@ -79,7 +68,7 @@ export class GuestService {
 
         if (slotTime >= fromDate && slotTime <= toDate) {
           const startTime = slotTime.toISOString();
-          const isBooked = this.bookings.some(
+          const isBooked = this.storage.getBookings().some(
             (booking) =>
               booking.eventTypeId === eventTypeId &&
               booking.slotTime === startTime,
@@ -109,8 +98,7 @@ export class GuestService {
       ...dto,
       createdAt: new Date().toISOString(),
     };
-    this.bookings.push(booking);
 
-    return booking;
+    return this.storage.addBooking(booking);
   }
 }

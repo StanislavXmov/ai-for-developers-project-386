@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Booking, EventType, AdminSlot } from '../entities';
 import { CreateEventTypeDto, CreateAdminSlotDto } from '../dtos';
+import { JsonStorageService } from '../storage/json-storage.service';
 
 @Injectable()
 export class AdminService {
-  private eventTypes: EventType[] = [];
-  private bookings: Booking[] = [];
-  private adminSlots: AdminSlot[] = [];
+  constructor(private readonly storage: JsonStorageService) {}
 
   getUpcomingBookings(): Booking[] {
     const now = new Date();
-    return this.bookings.filter(b => new Date(b.slotTime) > now);
+    return this.storage.getBookings().filter(b => new Date(b.slotTime) > now);
   }
 
   createEventType(dto: CreateEventTypeDto): EventType {
@@ -20,24 +19,23 @@ export class AdminService {
       description: dto.description,
       durationMinutes: dto.durationMinutes,
     };
-    this.eventTypes.push(eventType);
-    return eventType;
+    return this.storage.addEventType(eventType);
   }
 
   getSlots(): AdminSlot[] {
-    return this.adminSlots;
+    return this.storage.getAdminSlots();
   }
 
   createSlots(dtos: CreateAdminSlotDto[]): AdminSlot[] {
-    this.adminSlots = dtos.map(dto => ({
+    const adminSlots = dtos.map(dto => ({
       dayOfWeek: dto.dayOfWeek,
       startTime: dto.startTime,
       endTime: dto.endTime,
     }));
-    return this.adminSlots;
+    return this.storage.replaceAdminSlots(adminSlots);
   }
 
   getAdminSlotForDay(dayOfWeek: number): AdminSlot | undefined {
-    return this.adminSlots.find(slot => slot.dayOfWeek === dayOfWeek);
+    return this.storage.getAdminSlots().find(slot => slot.dayOfWeek === dayOfWeek);
   }
 }

@@ -1,0 +1,44 @@
+{
+  "eventTypes": [
+    {
+      "id": "1",
+      "name": "Consultation",
+      "description": "30-minute consultation call",
+      "durationMinutes": 30
+    },
+    {
+      "id": "2",
+      "name": "Demo",
+      "description": "Product demo session",
+      "durationMinutes": 60
+    }
+  ],
+  "bookings": [],
+  "adminSlots": [
+    {
+      "dayOfWeek": 1,
+      "startTime": "14:00",
+      "endTime": "16:00"
+    },
+    {
+      "dayOfWeek": 2,
+      "startTime": "14:00",
+      "endTime": "16:00"
+    },
+    {
+      "dayOfWeek": 3,
+      "startTime": "14:00",
+      "endTime": "16:00"
+    },
+    {
+      "dayOfWeek": 4,
+      "startTime": "14:00",
+      "endTime": "16:00"
+    },
+    {
+      "dayOfWeek": 5,
+      "startTime": "14:00",
+      "endTime": "16:00"
+    }
+  ]
+}
