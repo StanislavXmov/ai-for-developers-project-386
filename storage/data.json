@@ -13,7 +13,16 @@
       "durationMinutes": 60
     }
   ],
-  "bookings": [],
+  "bookings": [
+    {
+      "id": "f0756c56-decf-4dca-99b8-8f3af60e5075",
+      "eventTypeId": "1",
+      "slotTime": "2026-06-04T11:30:00.000Z",
+      "guestName": "test",
+      "guestEmail": "test@test.com",
+      "createdAt": "2026-05-31T08:28:40.300Z"
+    }
+  ],
   "adminSlots": [
     {
       "dayOfWeek": 1,

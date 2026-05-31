@@ -6,9 +6,6 @@ import { JsonStorageService } from "../storage/json-storage.service";
 
 @Injectable()
 export class GuestService {
-  private readonly defaultStartHour = 9;
-  private readonly defaultEndHour = 17;
-
   constructor(
     private readonly adminService: AdminService,
     private readonly storage: JsonStorageService,
@@ -38,24 +35,27 @@ export class GuestService {
 
     const slots: Slot[] = [];
     const currentDay = new Date(fromDate);
-    currentDay.setUTCHours(0, 0, 0, 0);
+    currentDay.setHours(0, 0, 0, 0);
 
     while (currentDay <= toDate) {
-      const dayOfWeek = currentDay.getUTCDay();
+      const dayOfWeek = currentDay.getDay();
       const adminSlot = this.adminService.getAdminSlotForDay(dayOfWeek);
 
-      const startHour = adminSlot
-        ? parseInt(adminSlot.startTime.split(":")[0], 10)
-        : this.defaultStartHour;
-      const endHour = adminSlot
-        ? parseInt(adminSlot.endTime.split(":")[0], 10)
-        : this.defaultEndHour;
+      if (!adminSlot) {
+        currentDay.setDate(currentDay.getDate() + 1);
+        continue;
+      }
+
+      const [startHour, startMinute] = adminSlot.startTime
+        .split(":")
+        .map(Number);
+      const [endHour, endMinute] = adminSlot.endTime.split(":").map(Number);
 
       const slotTime = new Date(currentDay);
-      slotTime.setUTCHours(startHour, 0, 0, 0);
+      slotTime.setHours(startHour, startMinute, 0, 0);
 
       const workdayEnd = new Date(currentDay);
-      workdayEnd.setUTCHours(endHour, 0, 0, 0);
+      workdayEnd.setHours(endHour, endMinute, 0, 0);
 
       while (slotTime < workdayEnd) {
         const slotEnd = new Date(
@@ -81,12 +81,10 @@ export class GuestService {
           });
         }
 
-        slotTime.setUTCMinutes(
-          slotTime.getUTCMinutes() + eventType.durationMinutes,
-        );
+        slotTime.setMinutes(slotTime.getMinutes() + eventType.durationMinutes);
       }
 
-      currentDay.setUTCDate(currentDay.getUTCDate() + 1);
+      currentDay.setDate(currentDay.getDate() + 1);
     }
 
     return slots;
